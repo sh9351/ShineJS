@@ -12,26 +12,7 @@ const waitForElm = selector => new Promise(resolve => {
     })
 })
 const script = Array.from(document.querySelectorAll('script')).filter(i => i.outerHTML.includes('shine'))[0]
-waitForElm(script.getAttribute('mount') || 'app').then(() => {
-    if (script.getAttribute('log')) {
-        log = console.trace
-    } else {
-        log => ShineJS.Logs.push(log)
-    }
-    log('ShineJS: OnLoad')
-    const render = () => {
-        log('ShineJS: Render')
-        let text = HTML
-        let previousText = mountTarget.innerHTML
-        Object.keys(ShineJS.States).forEach(key => {
-            text.split('{').slice(1).forEach(i => {
-                text = text.replaceAll('{' + i.split('}')[0] + '}', ShineJS.States[key])
-            })
-        })
-        if (previousText != text) mountTarget.innerHTML = text
-        else log('ShineJS: ElementNoDiff')
-    }
-    const mountTarget = document.querySelector(script.getAttribute('mount') || 'app')
+waitForElm(script?.getAttribute('mount') || 'app').then(() => {
     ShineJS = {
         useState: (key, value) => {
             ShineJS.States[key] = value
@@ -50,5 +31,25 @@ waitForElm(script.getAttribute('mount') || 'app').then(() => {
         States: {},
         Logs: []
     }
+    let log
+    if (script?.getAttribute('log')) {
+        log = console.trace
+    } else {
+        log = log => ShineJS.Logs.push(log)
+    }
+    log('ShineJS: OnLoad')
+    const mountTarget = document.querySelector(script?.getAttribute('mount') || 'app')
     const HTML = mountTarget.innerHTML
+    const render = () => {
+        log('ShineJS: Render')
+        let text = HTML
+        let previousText = mountTarget.innerHTML
+        Object.keys(ShineJS.States).forEach(key => {
+            text.split('{').slice(1).forEach(i => {
+                text = text.replaceAll('{' + i.split('}')[0] + '}', ShineJS.States[key])
+            })
+        })
+        if (previousText != text) mountTarget.innerHTML = text
+        else log('ShineJS: ElementNoDiff')
+    }
 })
